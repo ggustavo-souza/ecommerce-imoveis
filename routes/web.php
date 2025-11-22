@@ -2,12 +2,13 @@
 
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\FavoriteController; // <<< ADICIONE ESTE
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Models\Product; // *** ADICIONADO ***
+use App\Models\Product;
+use Darryldecode\Cart\Facades\CartFacade as Cart; 
 
 // Rota da Página Inicial
 Route::get('/', function () {
@@ -49,11 +50,17 @@ Route::middleware('auth')->group(function () {
             return view('dashboard');
     })->name('dashboard');
 
-    // ===== CORREÇÃO DE ORDEM E SEGURANÇA =====
-    // O CRUD de produtos (create, store, edit, update, destroy)
-    // foi movido para dentro do grupo 'auth' para proteção.
-    // Ele vem ANTES do 'products/{product}' para corrigir o erro 404.
-    // O 'index' e 'show' são excluídos porque são tratados separadamente.
+       Route::middleware('admin')->group(function () {
+        Route::get('/products/create', [ProductController::class, 'create'])->name('products.create'); // <-- ESTA VEM PRIMEIRO
+        Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+        Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+        Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+        Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    });
+
+    Route::get('products/{product}', [ProductController::class, 'show'])->name('products.show'); 
+
+    
     Route::resource('products', ProductController::class)->except(['show', 'index']);
 
     // Rota para ver detalhes do produto, agora exige login
@@ -63,12 +70,16 @@ Route::middleware('auth')->group(function () {
 
 // Rotas do Carrinho - Acesso Aberto
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-Route::post('/cart/add/{id}', [CartController::class, 'addToCart'])->name('cart.add'); // Mantido seu método addToCart
-Route::patch('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update'); // Rota para atualizar quantidade
-Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove'); // Rota para remover item
-
+Route::post('/cart/add/{id}', [CartController::class, 'addToCart'])->name('cart.add');
+Route::patch('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
+Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 // Rota para exibir a página de checkout - Acesso Aberto
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+
+Route::get('/limpar-tudo', function () {
+    Cart::clear();
+    return redirect()->route('products.index')->with('success', 'Carrinho limpo com sucesso! Tente comprar novamente.');
+});
 
 // Inclui as rotas de autenticação (login, register, etc.) do Breeze
 require __DIR__.'/auth.php';

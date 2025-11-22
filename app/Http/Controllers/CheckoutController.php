@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
-use Cart; // darryldecode cart facade
+use Darryldecode\Cart\Facades\CartFacade as Cart;
 
 
 class CheckoutController extends Controller
