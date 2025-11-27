@@ -43,9 +43,7 @@
         <div class="col-lg-6">
             <h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-4">Sua nova vida começa aqui!</h1>
             <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-                <a href="{{ route('products.index') }}" class="btn bg-orange-600 hover:bg-orange-700 text-white btn-lg px-4 me-md-2 fw-bold">
-                    Ver imóveis disponíveis
-                </a>
+                <a href="{{ Auth::check() ? route('products.index') : route('login') }}" class="btn bg-orange-500 text-white hover:bg-orange-600 btn-sm btn-lg px-4 me-md-2 fw-bold">
             </div>
         </div>
     </div>

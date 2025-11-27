@@ -6,6 +6,7 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Product;
 use Darryldecode\Cart\Facades\CartFacade as Cart; 
@@ -51,12 +52,20 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
        Route::middleware('admin')->group(function () {
-        Route::get('/products/create', [ProductController::class, 'create'])->name('products.create'); // <-- ESTA VEM PRIMEIRO
-        Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-        Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
-        Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
-        Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-    });
+    
+    // Gerenciamento de Usuários
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit'); // Form de editar
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');  // Salvar edição
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy'); // Deletar
+
+    // Gerenciamento de Produtos
+    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+});
 
     Route::get('products/{product}', [ProductController::class, 'show'])->name('products.show'); 
 
