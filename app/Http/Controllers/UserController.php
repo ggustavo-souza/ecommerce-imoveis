@@ -18,11 +18,11 @@ class UserController extends Controller
         // Busca todos os usuários, 10 por página
         $users = User::paginate(10);
 
-        return view('users.index', compact('users'));
+        return view('usuarios.index', compact('users'));
     }
     public function edit(User $user)
     {
-        return view('users.edit', compact('user'));
+        return view('usuarios.edit', compact('user'));
     }
 
     /**
@@ -32,7 +32,7 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+            'email' => ['required', 'email', Rule::unique('usuarios')->ignore($user->id)],
             'is_admin' => ['required', 'boolean'],
             'password' => ['nullable', 'string', 'min:8'],
         ]);
@@ -45,7 +45,7 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        return redirect()->route('users.index')->with('success', 'Usuário atualizado com sucesso!');
+        return redirect()->route('usuarios.index')->with('success', 'Usuário atualizado com sucesso!');
     }
 
     /**
@@ -55,11 +55,11 @@ class UserController extends Controller
     {
         // Proteção: Impede que o admin exclua a si mesmo
         if (Auth::id() === $user->id) {
-            return redirect()->route('users.index')->with('error', 'Você não pode excluir sua própria conta por aqui.');
+            return redirect()->route('usuarios.index')->with('error', 'Você não pode excluir sua própria conta por aqui.');
         }
 
         $user->delete();
 
-        return redirect()->route('users.index')->with('success', 'Usuário excluído com sucesso!');
+        return redirect()->route('usuarios.index')->with('success', 'Usuário excluído com sucesso!');
     }
 }

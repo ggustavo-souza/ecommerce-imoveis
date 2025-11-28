@@ -59,7 +59,7 @@
                                             </span>
                                         @else
                                             <span
-                                                class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-700/10">
+                                                class="inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-700 ring-1 ring-inset ring-purple-700/10">
                                                 <i class="bi bi-person-check-fill"></i> Cliente
                                             </span>
                                         @endif
@@ -72,7 +72,6 @@
                                         </div>
                                     </td>
 
-                                    {{-- *** AÇÕES FUNCIONAIS *** --}}
                                     <td class="px-6 py-4 text-end">
                                         <div class="flex justify-end gap-3 items-center">
                                             {{-- Botão Editar --}}
@@ -81,19 +80,90 @@
                                                 <i class="bi bi-pencil-square text-lg"></i>
                                             </a>
 
-                                            {{-- Botão Excluir (Com proteção para não excluir a si mesmo) --}}
-                                            @if(Auth::id() !== $user->id)
-                                                <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                        class="text-gray-400 hover:text-red-600 transition-colors pt-1"
-                                                        title="Excluir"
-                                                        onclick="return confirm('Tem certeza que deseja excluir o usuário {{ $user->name }}? Esta ação não pode ser desfeita.')">
-                                                        <i class="bi bi-trash text-lg"></i>
-                                                    </button>
-                                                </form>
-                                            @endif
+@if(Auth::id() !== $user->id)
+    {{-- Alpine.js Data Scope para o Modal --}}
+    <div x-data="{ open: false, userName: '{{ $user->name }}' }">
+        
+        {{-- Botão para Abrir o Modal --}}
+        <button type="button"
+            @click="open = true"
+            class="text-gray-400 hover:text-red-600 transition-colors pt-1"
+            title="Excluir">
+            <i class="bi bi-trash text-lg"></i> {{-- Ícone de lixeira (substitua se usar outro) --}}
+        </button>
+
+        {{-- O Modal em si --}}
+        <div x-show="open"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 sm:p-0"
+             aria-labelledby="modal-title"
+             role="dialog"
+             aria-modal="true"
+             style="display: none;"> {{-- Esconde por padrão para evitar FOUC --}}
+
+            {{-- Overlay de Fundo (Backdrop) --}}
+            <div @click="open = false"
+                 class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity"
+                 aria-hidden="true">
+            </div>
+
+            {{-- Painel do Conteúdo do Modal --}}
+            <div x-show="open"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="relative bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full w-full mx-auto">
+                
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        {{-- Ícone de Alerta --}}
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <i class="bi bi-exclamation-triangle-fill text-red-600 text-xl"></i> {{-- Ícone de alerta (substitua se usar outro) --}}
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                Confirmar Exclusão
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">
+                                    Você tem certeza que deseja excluir o usuário <strong x-text="userName"></strong>? Esta ação é **irreversível** e todos os dados associados serão perdidos.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {{-- Rodapé e Botões de Ação --}}
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    {{-- Formulário de Exclusão --}}
+                    <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline-block sm:ml-3">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm">
+                            Sim, Excluir
+                        </button>
+                    </form>
+                    
+                    {{-- Botão de Cancelar --}}
+                    <button type="button"
+                        @click="open = false"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
                                     </td>
                                 </tr>
                             @endforeach

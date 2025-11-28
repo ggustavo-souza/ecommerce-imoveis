@@ -50,7 +50,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
             <h1>Catálogo de Produtos</h1>
             @if(Auth::check() && Auth::user()->is_admin)
-                <a href="{{ route('products.create') }}" class="btn btn-success">
+                <a href="{{ route('products.create') }}" class="btn bg-orange-500 hover:bg-orange-600 text-white">
                     <i class="bi bi-plus-lg"></i> Novo Produto
                 </a>
             @endif
